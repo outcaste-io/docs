@@ -77,7 +77,7 @@ async function accountBal({args, graphql}) {
     return {"address": args.address, "value": 0}
   }
   acc = results.data.queryAccount[0]
-  inc = acc.incomingAggregate.valueSum;
+  inc = acc.incomingAggregate.valueSum; // Validation skipped for brevity
   out = acc.outgoingAggregate.valueSum;
   diff = inc - out
   return {"address": args.address, "value": diff}
