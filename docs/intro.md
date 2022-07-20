@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Get Started
 
-Let's discover **Outserv in less than 5 minutes.**
+Let's get started with **Outserv in less than 5 minutes.**
 
 ## 0. Prerequisites
 
@@ -19,21 +19,11 @@ Let's discover **Outserv in less than 5 minutes.**
 We recommend you use a Linux system to run Outserv. To run lambda functions, we
 recommend installing nodejs as well.
 
-```bash
-sudo apt-get install nodejs
-```
-
-## Option 1.a) Download executable
-
-Download the Outserv binary from
-[releases](https://github.com/outcaste-io/outserv/releases) and place it in
-`/usr/bin` or `/usr/local/bin`.
-
-## Option 1.b) Build Outserv Yourself
+## 1. Install Outserv
 
 ```bash
 sudo apt-get update
-sudo apt-get install gcc make golang
+sudo apt-get install gcc make golang nodejs
 
 git clone https://github.com/outcaste-io/outserv.git
 cd ./outserv
@@ -49,6 +39,19 @@ We will run Outserv with Lambdas. So, ensure that you have NodeJS installed.
 outserv graphql --lambda="num=2;" # Data would go into "data" dir.
 ```
 
+:::tip Lambda Errors
+
+If you get lambda errors, most likely the JS files in lambda directory are
+incompatible with your nodejs installation (they were built with 16.14.2). You
+can regenerate them like so, and re-run outserv.
+
+```
+cd outserv/lambda
+make build
+```
+
+:::
+
 ## 3. Load up GraphQL Schema and Lambdas
 
 You can pick up a GraphQL schema and Lambda code from
@@ -56,6 +59,7 @@ You can pick up a GraphQL schema and Lambda code from
 or use your own schema.
 
 ```bash
+cd outserv/importers/eth
 curl -X POST http://localhost:8080/admin/schema --data-binary '@schema.graphql'
 curl -X POST http://localhost:8080/admin/lambda --data-binary '@lambda.js'
 ```
@@ -69,7 +73,7 @@ faster](https://twitter.com/manishrjain/status/1546675483986710529) than
 JSON-RPC.
 
 ```bash
-cd importers/eth
+cd outserv/importers/eth
 go build . && ./eth --geth "GraphQL or JSON-RPC endpoint of Geth"
 ```
 
