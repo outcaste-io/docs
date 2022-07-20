@@ -1,24 +1,20 @@
 ---
-sidebar_position: 11
+sidebar_position: 8
 ---
 
+# 8. Migration
 
-In every app's development lifecycle, there's a point where the underlying schema doesn't fit the requirements and must be changed for good.
-That requires a migration for both schema and the underlying data.
-This article will guide you through common migration scenarios you can encounter with Dgraph and help you avoid any pitfalls around them.
+In every app's development lifecycle, there's a point where the underlying
+schema doesn't fit the requirements and must be changed for good. That requires
+a migration for both schema and the underlying data. This article will guide you
+through common migration scenarios you can encounter with Outserv and help you
+avoid any pitfalls around them.
 
 These are the most common scenarios that can occur:
 * Renaming a type
 * Renaming a field
 * Changing a field's type
 * Adding `@id` to an existing field
-
-{{% notice "note" %}}
-As long as you can avoid migration, avoid it.
-Because there can be scenarios where you might need to update downstream clients, which can be hard.
-So, its always best to try out things first, once you are confident enough, then only push them to
-production.
-{{% /notice %}}
 
 ### Renaming a type
 
@@ -57,7 +53,7 @@ type AppUser @dgraph(type: "User") {
 
 So, no downtime required. Migration is done by just updating your schema. Fast, easy, and simple.
 
-Note that, irrespective of what option you choose for migration on Dgraph side, you will still
+Note that, irrespective of what option you choose for migration on Outserv side, you will still
 need to migrate your GraphQL clients to use the new name in queries/mutations. For example, the
 query `getUser` would now be renamed to `getAppUser`. So, your downstream clients need to update
 that bit in the code.
@@ -91,7 +87,7 @@ type User {
 }
 ```
 
-Again, note that, irrespective of what option you choose for migration on Dgraph side, you will
+Again, note that, irrespective of what option you choose for migration on Outserv side, you will
 still need to migrate your GraphQL clients to use the new name in queries/mutations. For example,
 the following query:
 
@@ -123,10 +119,6 @@ There can be multiple scenarios in this category:
 * List -> Single item
 * `String` -> `Int`
 * Any other combination you can imagine
-
-It is strictly advisable that you figure out a solid schema before going in production, so that
-you don't have to deal with such cases later. Nevertheless, if you ended up in such a situation, you
-have to migrate your data to fit the new schema. There is no easy way around here.
 
 An example scenario is, if you initially had this schema:
 
@@ -162,7 +154,7 @@ type Owner {
 If you try updating your schema, you may end up getting an error like this:
 
 ```txt
-resolving updateGQLSchema failed because succeeded in saving GraphQL schema but failed to alter Dgraph schema - GraphQL layer may exhibit unexpected behavior, reapplying the old GraphQL schema may prevent any issues: Schema change not allowed from [uid] => uid without deleting pred: owner.todo
+resolving updateGQLSchema failed because succeeded in saving GraphQL schema but failed to alter Outserv schema - GraphQL layer may exhibit unexpected behavior, reapplying the old GraphQL schema may prevent any issues: Schema change not allowed from [uid] => uid without deleting pred: owner.todo
 ```
 
 That is a red flag. As the error message says, you should revert to the old schema to make your
@@ -206,7 +198,7 @@ query {
 Then it might error out saying:
 
 ```txt
-A list was returned, but GraphQL was expecting just one item. This indicates an internal error - probably a mismatch between the GraphQL and Dgraph/remote schemas. The value was resolved as null (which may trigger GraphQL error propagation) and as much other data as possible returned.
+A list was returned, but GraphQL was expecting just one item. This indicates an internal error - probably a mismatch between the GraphQL and Outserv/remote schemas. The value was resolved as null (which may trigger GraphQL error propagation) and as much other data as possible returned.
 ```
 
 So, while making such a schema change, you need to make sure that the underlying data really

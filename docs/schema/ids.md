@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Unique Identifiers
+# 2. Unique Identifiers
 
 Outserv provides two types of built-in identifiers: the `ID` scalar type and the `@id` directive.
 

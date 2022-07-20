@@ -1,6 +1,8 @@
 ---
-sidebar_position: 9
+sidebar_position: 7
 ---
+
+# 7. Deprecated
 
 The `@deprecated` directive allows you to tag the schema definition of a field or enum value as deprecated with an optional reason.
 

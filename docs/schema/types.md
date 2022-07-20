@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Types
+# 3. Types
 
 This page describes how you can use GraphQL types to set up a GraphQL schema for
 Outserv database.

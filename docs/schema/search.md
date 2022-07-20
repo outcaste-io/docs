@@ -1,39 +1,56 @@
 ---
-sidebar_position: 7
+sidebar_position: 5
 ---
 
-# Search Indices
+# 5. Search Indices
 
-The `@search` directive tells Dgraph what search to build into your GraphQL API.
+The `@search` directive tells Outserv what search to build into your GraphQL API.
 
-When a type contains an `@search` directive, Dgraph constructs a search input type and a query in the GraphQL `Query` type. For example, if the schema contains
+When a type contains an `@search` directive, Outserv constructs a search input
+type and a query in the GraphQL `Query` type. For example, if the schema
+contains
 
 ```graphql
-type Post {
+type Txn {
     ...
 }
 ```
 
-then Dgraph constructs a `queryPost` GraphQL query for querying posts.  The `@search` directives in the `Post` type control how Dgraph builds indexes and what kinds of search it builds into `queryPost`.  If the type contains
+then Outserv constructs a `queryTxn` GraphQL query for querying Txns.  The
+`@search` directives in the `Txn` type control how Outserv builds indexes and
+what kinds of search it builds into `queryTxn`.  If the type contains
 
 ```graphql
-type Post {
-    ...
-    datePublished: DateTime @search
+type Txn {
+  ...
+  timestamp: DateTime @search(by: [day])
 }
 ```
 
-then it's possible to filter posts with a date-time search like:
+then it's possible to filter Txns with a date-time search like:
 
 ```graphql
 query {
-    queryPost(filter: { datePublished: { ge: "2020-06-15" }}) {
+    queryTxn(filter: { timestamp : { ge: "2022-06-15" }}) {
         ...
     }
 }
 ```
 
-If the type tells Dgraph to build search capability based on a term (word) index for the `title` field
+Outserv can build search types with the ability to search between a range. For
+example with the above Txn type with timestamp field, a query can find
+Txns within a range
+
+```graphql
+query {
+    queryTxn(filter: { timestamp : { between: { min: "2022-06-15", max: "2022-06-30" }}}) {
+        ...
+    }
+}
+```
+
+
+If the type tells Outserv to build search capability based on a term (word) index for the `title` field
 
 ```graphql
 type Post {
@@ -52,7 +69,9 @@ query {
 }
 ```
 
-Dgraph also builds search into the fields of each type, so searching is available at deep levels in a query.  For example, if the schema contained these types
+Outserv also builds search into the fields of each type, so searching is
+available at deep levels in a query.  For example, if the schema contained these
+types:
 
 ```graphql
 type Post {
@@ -66,7 +85,9 @@ type Author {
 }
 ```
 
-then Dgraph builds GraphQL search such that a query can, for example, find an author by name (from the hash search on `name`) and return only their posts that contain the term "GraphQL".
+then Outserv builds GraphQL search such that a query can, for example, find an
+author by name (from the hash search on `name`) and return only their posts that
+contain the term "GraphQL".
 
 ```graphql
 queryAuthor(filter: { name: { eq: "Diggy" } } ) {
@@ -76,17 +97,7 @@ queryAuthor(filter: { name: { eq: "Diggy" } } ) {
 }
 ```
 
-Dgraph can build search types with the ability to search between a range. For example with the above Post type with datePublished field, a query can find publish dates within a range
-
-```graphql
-query {
-    queryPost(filter: { datePublished: { between: { min: "2020-06-15", max: "2020-06-16" }}}) {
-        ...
-    }
-}
-```
-
-Dgraph can also build GraphQL search ability to find match a value from a list. For example with the above Author type with the name field, a query can return the Authors that match a list
+Outserv can also build GraphQL search ability to find match a value from a list. For example with the above Author type with the name field, a query can return the Authors that match a list
 
 ```graphql
 queryAuthor(filter: { name: { in: ["Diggy", "Jarvis"] } } ) {
@@ -96,81 +107,38 @@ queryAuthor(filter: { name: { in: ["Diggy", "Jarvis"] } } ) {
 
 There's different search possible for each type as explained below.
 
-### Int, Float and DateTime
+## Int, Float, DateTime
 
 | argument | constructed filter |
 |----------|----------------------|
 | none | `lt`, `le`, `eq`, `in`, `between`, `ge`, and `gt` |
 
-Search for fields of types `Int`, `Float` and `DateTime` is enabled by adding `@search` to the field with no arguments.  For example, if a schema contains:
+Search for fields of types `Int`, `Float` and `DateTime` is enabled by adding
+`@search` to the field with no arguments.  For example, if a schema contains:
 
 ```graphql
-type Post {
-    ...
-    numLikes: Int @search
+type Txn {
+  blockNumber: Int64 @search
 }
 ```
 
-Dgraph generates search into the API for `numLikes` in two ways: a query for posts and field search on any post list.
-
-A field `queryPost` is added to the `Query` type of the schema.
-
-```graphql
-type Query {
-    ...
-    queryPost(filter: PostFilter, order: PostOrder, first: Int, offset: Int): [Post]
-}
-```
-
-`PostFilter` will contain less than `lt`, less than or equal to `le`, equal `eq`, in list `in`, between range `between`, greater than or equal to `ge`, and greater than `gt` search on `numLikes`.  Allowing for example:
-
-```graphql
-query {
-    queryPost(filter: { numLikes: { gt: 50 }}) {
-        ...
-    }
-}
-```
-
-Also, any field with a type of list of posts has search options added to it. For example, if the input schema also contained:
-
-```graphql
-type Author {
-    ...
-    posts: [Post]
-}
-```
-
-Dgraph would insert search into `posts`, with
-
-```graphql
-type Author {
-    ...
-    posts(filter: PostFilter, order: PostOrder, first: Int, offset: Int): [Post]
-}
-```
-
-That allows search within the GraphQL query.  For example, to find Diggy's posts with more than 50 likes.
-
-```graphql
-queryAuthor(filter: { name: { eq: "Diggy" } } ) {
-    ...
-    posts(filter: { numLikes: { gt: 50 }}) {
-        title
-        text
-    }
-}
-```
-
-### DateTime
+## DateTime
 
 | argument | constructed filters |
 |----------|----------------------|
 | `year`, `month`, `day`, or `hour` | `lt`, `le`, `eq`, `in`, `between`, `ge`, and `gt` |
 
-As well as `@search` with no arguments, `DateTime` also allows specifying how the search index should be built: by year, month, day or hour.  `@search` defaults to year, but once you understand your data and query patterns, you might want to changes that like `@search(by: [day])`.
+As well as `@search` with no arguments, `DateTime` also allows specifying how
+the search index should be built: by `year`, `month`, `day` or `hour`.
+`@search` defaults to year, but once you understand your data and query
+patterns, you might want to changes that like `@search(by: [day])`.
 
-### Boolean
+```graphql
+type Txn {
+  timestamp: DateTime @search(by: [day])
+```
+
+## Boolean
 
 | argument | constructed filter |
 |----------|----------------------|
@@ -179,18 +147,20 @@ As well as `@search` with no arguments, `DateTime` also allows specifying how th
 Booleans can only be tested for true or false.  If `isPublished: Boolean @search` is in the schema, then the search allows
 
 ```graphql
-filter: { isPublished: true }
+type Txn {
+  statusOk: Boolean @search
+}
+
+# Would allow filtering Txns with:
+
+filter: { statusOk: true }
+filter: { statusOk: false }
 ```
 
-and
+## String
 
-```graphql
-filter: { isPublished: false }
-```
-
-### String
-
-Strings allow a wider variety of search options than other types.  For strings, you have the following options as arguments to `@search`.
+Strings allow a wider variety of search options than other types.  For strings,
+you have the following options as arguments to `@search`.
 
 | argument | constructed searches |
 |----------|----------------------|
@@ -200,13 +170,17 @@ Strings allow a wider variety of search options than other types.  For strings, 
 | `term` | `allofterms` and `anyofterms` |
 | `fulltext` | `alloftext` and `anyoftext` |
 
-* *Schema rule*: `hash` and `exact` can't be used together.
-
-#### String exact and hash search
+### Exact and Hash search
 
 Exact and hash search has the standard lexicographic meaning.
 
 ```graphql
+type Author {
+    ...
+    name: String! @search(by: [hash])
+}
+
+# Allows:
 query {
     queryAuthor(filter: { name: { eq: "Diggy" } }) { ... }
 }
@@ -215,56 +189,78 @@ query {
 And for exact search
 
 ```graphql
+type Author {
+    ...
+    name: String! @search(by: [exact])
+}
+
+# Allows the following query to find names after "Diggy".
+
 query {
     queryAuthor(filter: { name: { gt: "Diggy" } }) { ... }
 }
 ```
 
-to find users with names lexicographically after "Diggy".
+### Regular expression search
 
-#### String regular expression search
-
-Search by regular expression requires bracketing the expression with `/` and `/`.  For example, query for "Diggy" and anyone else with "iggy" in their name:
+Search by regular expression requires bracketing the expression with `/` and
+`/`.  For example, query for "Diggy" and anyone else with "iggy" in their name:
 
 ```graphql
+type Author {
+    ...
+    name: String! @search(by: [regexp])
+}
+
+# Allows:
 query {
     queryAuthor(filter: { name: { regexp: "/.*iggy.*/" } }) { ... }
 }
 ```
 
-#### String term and fulltext search
+### Term and Fulltext search
 
-If the schema has
+`term` search is a term matching search, using non-alphanumeric separators to
+break up the terms in a phrase. For example, "aaa-bbb" would match "aaa bbb".
+
+`fulltext` search is Google-stye
+text search with stop words, stemming. etc. In other words, `fulltext` search
+would match even future or past participles of the word. In the following
+example, "flying" would match with "fly", or "flew".
 
 ```graphql
 type Post {
     title: String @search(by: [term])
-    text: String @search(by: [fulltext])
+    body: String @search(by: [fulltext])
     ...
 }
-```
 
-then
-
-```graphql
+# Allows:
 query {
-    queryPost(filter: { title: { `allofterms: "GraphQL tutorial"` } } ) { ... }
+    # Match all titles with both 'GraphQL' and 'tutorial'.
+    queryPost(filter: { title: { allofterms: "GraphQL tutorial" } } ) { ... }
+
+    # Match all titles with either 'GraphQL' or 'tutorial'.
+    queryPost(filter: { title: { anyofterms: "GraphQL tutorial" } } ) { ... }
+}
+
+query {
+    # Match all body with both "flying" and "pig". But, also similar words like
+    # "fly", or "flew".
+    queryPost(filter: { body: { alloftext: "flying pig" } } ) { ... }
+
+    # Match all body with either "flying" or "pig". But, also similar words like
+    # "fly", or "flew".
+    queryPost(filter: { body: { alloftext: "flying pig" } } ) { ... }
 }
 ```
 
-will match all posts with both "GraphQL and "tutorial" in the title, while `anyofterms: "GraphQL tutorial"` would match posts with either "GraphQL" or "tutorial".
 
-`fulltext` search is Google-stye text search with stop words, stemming. etc.  So `alloftext: "run woman"` would match "run" as well as "running", etc.  For example, to find posts that talk about fantastic GraphQL tutorials:
+### Mix and Match
 
-```graphql
-query {
-    queryPost(filter: { title: { `alloftext: "fantastic GraphQL tutorials"` } } ) { ... }
-}
-```
-
-#### Strings with multiple searches
-
-It's possible to add multiple string indexes to a field.  For example to search for authors by `eq` and regular expressions, add both options to the type definition, as follows.
+It's possible to add multiple string indexes to a field.  For example to search
+for authors by `eq` and regular expressions, add both options to the type
+definition as follows.
 
 ```graphql
 type Author {
@@ -273,7 +269,12 @@ type Author {
 }
 ```
 
-### Enums
+:::tip hash and exact
+`hash` and `exact` can't be used together on the same field.
+:::
+
+
+## Enums
 
 | argument | constructed searches |
 |----------|----------------------|
@@ -282,42 +283,36 @@ type Author {
 | `exact` | `lt`, `le`, `eq`, `in`, `between`, `ge`, and `gt` (lexicographically) |
 | `regexp` | `regexp` (regular expressions) |
 
-Enums are serialized in Dgraph as strings.  `@search` with no arguments is the same as `@search(by: [hash])` and provides `eq` and `in` searches.  Also available for enums are `exact` and `regexp`.  For hash and exact search on enums, the literal enum value, without quotes `"..."`, is used, for regexp, strings are required. For example:
+Enums are serialized in Outserv as strings.  `@search` with no arguments is the same as `@search(by: [hash])` and provides `eq` and `in` searches.  Also available for enums are `exact` and `regexp`.  For hash and exact search on enums, the literal enum value, without quotes `"..."`, is used, for regexp, strings are required. For example:
 
 ```graphql
-enum Tag {
-    GraphQL
-    Question
-    ...
+enum Status {
+    TXN_OK
+    TXN_FAILED
+    UNKNOWN
 }
 
-type Post {
-    ...
-    tags: [Tag!]! @search
+type Txn {
+  oid: ID!
+  hash: String! @id
+  status: Status @search
+}
+
+# Allows:
+query {
+    queryTxn(filter: { status: { eq: TXN_OK } } ) { ... }
 }
 ```
 
-would allow
+While `@search(by: [exact, regexp]` would allow
 
 ```graphql
 query {
-    queryPost(filter: { tags: { eq: GraphQL } } ) { ... }
+    queryPost(filter: { status: { regexp: "/TXN_.*/" } } ) { ... }
 }
 ```
 
-Which would find any post with the `GraphQL` tag.
-
-While `@search(by: [exact, regexp]` would also admit `lt` etc. and
-
-```graphql
-query {
-    queryPost(filter: { tags: { regexp: "/.*aph.*/" } } ) { ... }
-}
-```
-
-which is helpful for example if the enums are something like product codes where regular expressions can match a number of values.
-
-### Geolocation
+## Geolocation
 
 There are 3 Geolocation types: `Point`, `Polygon` and `MultiPolygon`. All of them are searchable.
 
@@ -328,8 +323,6 @@ The following table lists the generated filters for each type when you include `
 | `Point` | `near`, `within` |
 | `Polygon` | `near`, `within`, `contains`, `intersects` |
 | `MultiPolygon` | `near`, `within`, `contains`, `intersects` |
-
-#### Example
 
 Take for example a `Hotel` type that has a `location` and an `area`:
 
@@ -342,7 +335,7 @@ type Hotel {
 }
 ```
 
-#### near
+### Near
 
 The `near` filter matches all entities where the location given by a field is within a distance `meters` from a coordinate.
 
@@ -362,7 +355,7 @@ queryHotel(filter: {
 }
 ```
 
-#### within
+### Within
 
 The `within` filter matches all entities where the location given by a field is within a defined `polygon`.
 
@@ -394,13 +387,13 @@ queryHotel(filter: {
 }
 ```
 
-#### contains
+### Contains
 
 The `contains` filter matches all entities where the `Polygon` or `MultiPolygon` field contains another given `point` or `polygon`.
 
-{{% notice "tip" %}}
+:::tip
 Only one `point` or `polygon` can be taken inside the `ContainsFilter` at a time.
-{{% /notice %}}
+:::
 
 A `contains` example using `point`:
 
@@ -440,13 +433,13 @@ A `contains` example using `polygon`:
 }
 ```
 
-#### intersects
+### Intersects
 
 The `intersects` filter matches all entities where the `Polygon` or `MultiPolygon` field intersects another given `polygon` or `multiPolygon`.
 
-{{% notice "tip" %}}
+:::tip
 Only one `polygon` or `multiPolygon` can be given inside the `IntersectsFilter` at a time.
-{{% /notice %}}
+:::
 
 ```graphql
   queryHotel(filter: {
@@ -522,14 +515,14 @@ Only one `polygon` or `multiPolygon` can be given inside the `IntersectsFilter` 
   }
 ```
 
-### Union
+## Union
 
 Unions can be queried only as a field of a type. Union queries can't be ordered, but you can filter and paginate them.
 
-{{% notice "note" %}}
+:::note
 Union queries do not support the `order` argument.
 The results will be ordered by the `uid` of each node in ascending order.
-{{% /notice %}}
+:::
 
 For example, the following schema will enable to query the `members` union field in the `Home` type with filters and pagination.
 
@@ -580,9 +573,9 @@ input ParrotFilter {
 }
 ```
 
-{{% notice "tip" %}}
+:::tip
 Not specifying any filter at all or specifying any of the `null` values for a filter will query all members.
-{{% /notice %}}
+:::
 
 
 
