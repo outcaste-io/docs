@@ -1,12 +1,13 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
-# Identifiers
+# Unique Identifiers
 
 Outserv provides two types of built-in identifiers: the `ID` scalar type and the `@id` directive.
 
-* The `ID` scalar type is used for internal Outserv UIDs.
+* The `ID` scalar type is used to refer to internal Outserv Unique Identifiers,
+    also known as UIDs.
 * The `@id` directive is used for external identifiers, such as hashes.
 
 ```graphql
@@ -27,11 +28,12 @@ In Outserv, every node has a unique 64-bit integer identifier that you can
 expose in GraphQL using the `ID` type. An `ID` is auto-generated, immutable and
 never reused. Each type can have at most one `ID` field.
 
-The `ID` type works great when you need to use an identifier on nodes and don't
-need to set that identifier externally.
-
 Irrespective of whether an external id `@id` exists or not, `ID` is always
 generated. That's how Outserv internally refers to the nodes.
+
+Fields of type `ID` can be listed as nullable in a schema, but Outserv will
+never return null. `ID` lists aren't allowed - e.g. `tags: [String]` is valid,
+but `ids: [ID]` is not.
 
 ## The `@id` directive
 
@@ -55,6 +57,9 @@ type Book {
 You can then use multiple `@id` fields in arguments to `get` queries, and while
 searching, these fields will be combined with the `AND` operator.
 
+The following would yield a positive response only if both the `name` **and**
+`isbn` match any node.
+
 ```graphql
 query {
   getBook(name: "The Metamorphosis", isbn: "9871165072") {
@@ -65,12 +70,11 @@ query {
 }
 ```
 
-This will yield a positive response if both the `name` **and** `isbn` match any node.
-
 Outserv enforces a uniqueness check on the `@id` field(s) when creating new
 nodes. If there are multiple such fields, then uniqueness is enforced by
 intersecting across all those field values (AND operator).
 
+<!--
 ## Interfaces and `@id`
 
 By default, if used in an interface, the `@id` directive will ensure field
@@ -97,4 +101,4 @@ type Chair implements Item { ... }
 ```
 
 In the above example, `itemID` won't be present as an argument to the `getItem` query as it might return more than one `Item`.
-
+-->

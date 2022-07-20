@@ -9,7 +9,7 @@ Outserv database.
 
 ## Scalars
 
-Outserv's GraphQL implementation comes with the standard GraphQL scalar types:
+Outserv's GraphQL implementation comes with these scalar types:
 
 - `Boolean`
 - `DateTime` (represented as string in RFC3339 format)
@@ -18,100 +18,89 @@ Outserv's GraphQL implementation comes with the standard GraphQL scalar types:
 - `Int64`
 - `Int`
 - `String`
+- `BigInt`
 
-Scalar types, including `Int`, `Int64`, `Float`, `String` and `DateTime`; can be
-used in lists. Lists behave like an *unordered set* in Outserv. For example:
-`["e1", "e1", "e2"]` may get stored as `["e2", "e1"]`, so duplicate values will
-not be stored and order might not be preserved. All scalars may be nullable or
-non-nullable.
-
-:::tip Int64 Type
-The `Int64` type introduced in release v20.11 represents a signed integer
-ranging between `-(2^63)` and `(2^63 -1)`. Signed `Int64` values in this range
-will be parsed correctly by Outserv as long as the client can serialize the
-number correctly in JSON. For example, a JavaScript client might need to use a
-serialization library such as
+The `Int64` type represents a signed integer ranging between `-(2^63)` and
+`(2^63 -1)`. Signed `Int64` values in this range will be parsed correctly by
+Outserv as long as the client can serialize the number correctly in JSON. For
+example, a JavaScript client might need to use a serialization library such as
 [`json-bigint`](https://www.npmjs.com/package/json-bigint) to correctly write an
 `Int64` value in JSON.
-:::
-
-The `ID` type is special.  IDs are auto-generated, immutable, and can be treated as strings.  Fields of type `ID` can be listed as nullable in a schema, but Outserv will never return null.
-
-* *Schema rule*: `ID` lists aren't allowed - e.g. `tags: [String]` is valid, but `ids: [ID]` is not.
-* *Schema rule*: Each type you define can have at most one field with type `ID`.  That includes IDs implemented through interfaces.
-
-It's not possible to define further scalars - you'll receive an error if the input schema contains the definition of a new scalar.
-
-For example, the following GraphQL type uses all of the available scalars.
-
-```graphql
-type User {
-    userID: ID!
-    name: String!
-    lastSignIn: DateTime
-    recentScores: [Float]
-    reputation: Int
-    active: Boolean
-}
-```
-
-Scalar lists in Outserv act more like sets, so `tags: [String]` would always contain unique tags.  Similarly, `recentScores: [Float]` could never contain duplicate scores.
 
 ## Enums
 
 You can define enums in your input schema.  For example:
 
 ```graphql
-enum Tag {
-    GraphQL
-    Question
-    ...
+enum Status {
+    OK
+    FAILED
 }
 
-type Post {
-    ...
-    tags: [Tag!]!
+type Txn {
+  oid: ID!
+  hash: String! @id
+  status: Status
 }
 ```
 
 ## Types
 
-From the built-in scalars and the enums you add, you can generate types in the usual way for GraphQL.  For example:
+From the built-in scalars and the enums you add, you can generate types in the
+usual way for GraphQL.  For example:
 
 ```graphql
-enum Tag {
-    GraphQL
-    Database
-    Outserv
+type Txn {
+  uid: ID!
+  hash: String! @id
+  value: Int64 @search
+  fee: Int64 @search
 }
 
-type Post {
-    id: ID!
-    title: String!
-    text: String
-    datePublished: DateTime
-    tags: [Tag!]!
-    author: Author!
-}
-
-type Author {
-    id: ID!
-    name: String!
-    posts: [Post!]
-    friends: [Author]
+type Block {
+  number: Int64 @id
+  timestamp: Int64 @search
+  transactions: [Txn]
 }
 ```
 
-* *Schema rule*: Lists of lists aren't accepted.  For example: `multiTags: [[Tag!]]` isn't valid.
-* *Schema rule*: Fields with arguments are not accepted in the input schema unless the field is implemented using the `@custom` directive.
+
+## Lists
+
+You can define a list with Scalars, or with other types.
+
+Lists of lists aren't accepted.  For example: `multiTags: [[Tag!]]` isn't valid.
+
+```graphql
+type Account {
+  oid: ID!
+  address: String! @id
+  notes: [String]
+  incoming: [Txn]
+  outgoing: [Txn]
+}
+```
+
+:::danger
+Scalar lists in Outserv act like unordered sets. So `tags: [String]` would
+always contain unique tags. For example, `["e1", "e1", "e2"]` may get stored as
+`["e2", "e1"]`
+:::
 
 ## Interfaces
 
-GraphQL interfaces allow you to define a generic pattern that multiple types follow.  When a type implements an interface, that means it has all fields of the interface and some extras.
+GraphQL interfaces allow you to define a generic pattern that multiple types
+follow.  When a type implements an interface, that means it has all fields of
+the interface and some extras.
 
-According to GraphQL specifications, you can have the same fields in implementing types as the interface. In such cases, the GraphQL layer will generate the correct Outserv schema without duplicate fields.
+According to GraphQL specifications, you can have the same fields in
+implementing types as the interface. In such cases, the GraphQL layer will
+generate the correct Outserv schema without duplicate fields.
 
-If you repeat a field name in a type, it must be of the same type (including list or scalar types), and it must have the same nullable condition as the interface's field. Note that if the interface's field has a directory like `@search` then it will be inherited by the implementing type's field.
+If you repeat a field name in a type, it must be of the same type (including
+list or scalar types), and it must have the same nullable condition as the
+interface's field. Note that if the interface's field has a directive like
+`@search` then it will be inherited by the implementing type's field.
 
 For example:
 
@@ -122,22 +111,20 @@ interface Fruit {
 }
 
 type Apple implements Fruit {
-    id: ID!
-    price: Int!
+    id: ID!     # repeated with same properties
+    price: Int! # repeated with same properties
     color: String!
 }
 
 type Banana implements Fruit {
-    id: ID!
-    price: Int!
+    id: ID!     # repeated with same properties
+    price: Int! # repeated with same properties
 }
 ```
 
-:::tip
-GraphQL will generate the correct Outserv schema where fields occur only once.
-:::
-
-The following example defines the schema for posts with comment threads. As mentioned, Outserv will fill in the `Question` and `Comment` types to make the full GraphQL types.
+The following example defines the schema for posts with comment threads. As
+mentioned, Outserv will fill in the `Question` and `Comment` types to make the
+full GraphQL types.
 
 ```graphql
 interface Post {
@@ -152,54 +139,35 @@ type Question implements Post {
 type Comment implements Post {
     commentsOn: Post!
 }
-```
 
-The generated schema will contain the full types, for example, `Question` and `Comment` get expanded as:
+# Generated Schema below
 
-```graphql
 type Question implements Post {
-    id: ID!
-    text: String
-    datePublished: DateTime
-    title: String!
+    id: ID!                 # derived from interface
+    text: String            # derived from interface
+    datePublished: DateTime # derived from interface
+    title: String!          # derived from type
 }
 
 type Comment implements Post {
-    id: ID!
-    text: String
-    datePublished: DateTime
-    commentsOn: Post!
+    id: ID!                 # derived from interface
+    text: String            # derived from interface
+    datePublished: DateTime # derived from interface
+    commentsOn: Post!       # derived from type
 }
 ```
 
-:::tip
+:::danger
 If you have a type that implements two interfaces, Outserv won't allow a field of the same name in both interfaces, except for the `ID` field.
 :::
 
-Outserv currently allows this behavior for `ID` type fields since the `ID` type field is not a predicate. Note that in both interfaces and the implementing type, the nullable condition and type (list or scalar) for the `ID` field should be the same. For example:
-
-```graphql
-interface Shape {
-    id: ID!
-    shape: String!
-}
-
-interface Color {
-    id: ID!
-    color: String!
-}
-
-type Figure implements Shape & Color {
-    id: ID!
-    shape: String!
-    color: String!
-    size: Int!
-}
-```
 
 ## Union type
 
-GraphQL Unions represent an object that could be one of a list of GraphQL Object types, but provides for no guaranteed fields between those types. So no fields may be queried on this type without the use of type refining fragments or inline fragments.
+GraphQL Unions represent an object that could be one of a list of GraphQL Object
+types, but provides for no guaranteed fields between those types. So no fields
+may be queried on this type without the use of type refining fragments or inline
+fragments.
 
 Union types have the potential to be invalid if incorrectly defined:
 
@@ -278,11 +246,9 @@ query {
     }
   }
 }
-```
 
-And the results of the GraphQL query will look like the following:
+# And the results of the GraphQL query will look like the following:
 
-```json
 {
   "data": {
     "queryHome": {
@@ -306,7 +272,7 @@ And the results of the GraphQL query will look like the following:
 ## Password type
 
 A password for an entity is set with setting the schema for the node type with `@secret` directive. Passwords cannot be queried directly, only checked for a match using the `checkTypePassword` function where `Type` is the node type.
-The passwords are encrypted using [Bcrypt](https://en.wikipedia.org/wiki/Bcrypt).
+The passwords are encrypted using [bcrypt](https://en.wikipedia.org/wiki/Bcrypt).
 
 :::tip
 For security reasons, Outserv enforces a minimum password length of 6 characters on `@secret` fields.

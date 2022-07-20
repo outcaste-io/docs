@@ -2,6 +2,8 @@
 sidebar_position: 7
 ---
 
+# Search Indices
+
 The `@search` directive tells Dgraph what search to build into your GraphQL API.
 
 When a type contains an `@search` directive, Dgraph constructs a search input type and a query in the GraphQL `Query` type. For example, if the schema contains
