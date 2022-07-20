@@ -16,3 +16,20 @@ GraphQL syntax and validation rules.
 
 If you want to make your schema editing experience nicer, you should use an
 editor that does syntax highlighting for GraphQL.
+
+## Uploading Schema to Outserv
+
+You can write your schema in a file, say `schema.graphql`, and upload it to
+Outserv like so:
+```bash
+curl -X POST http://localhost:8080/admin/schema --data-binary '@schema.graphql'
+```
+
+## Uploading Lambda code to Outserv
+
+You can write your lambda code in a file, say `lambda.js`, and upload it to
+Outserv like so:
+```bash
+curl -X POST http://localhost:8080/admin/lambda --data-binary '@lambda.js'
+```
+

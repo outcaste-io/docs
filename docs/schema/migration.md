@@ -1,8 +1,8 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 ---
 
-# 8. Migration
+# 9. Migration
 
 In every app's development lifecycle, there's a point where the underlying
 schema doesn't fit the requirements and must be changed for good. That requires
