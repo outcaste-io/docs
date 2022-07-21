@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Get Started
+# Get Started with Outserv
 
 Let's get started with **Outserv in less than 5 minutes.**
 
