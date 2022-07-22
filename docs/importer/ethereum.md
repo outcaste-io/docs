@@ -1,8 +1,8 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
-# 1. Import 15M Ethereum Blocks
+# 2. Import 15M Ethereum Blocks
 
 In this tutorial, we will import Ethereum transactions, their corresponding
 accounts and blocks. The relevant code is located in `outserv/importers/eth`.
