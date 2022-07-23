@@ -8,7 +8,8 @@ In this tutorial, we will import Ethereum transactions, their corresponding
 accounts and blocks. The relevant code is located in `outserv/importers/eth`.
 
 The 15M ETH blocks produce quite a lot of data. To import them, we'd use the
-`outserv boot` tool, aka the `boot loader`.
+`outserv boot` tool, aka the `boot loader`. This would allow us to *bootstrap*
+our Outserv instance in the fastest possible time.
 
 The `boot loader` takes in a GraphQL schema, and the input gzipped JSON files.
 It can also input via interprocess communication. We'd use the latter.
@@ -16,8 +17,8 @@ It can also input via interprocess communication. We'd use the latter.
 ## Run Eth importer
 
 :::tip
-To run this, you must have access to an Ethereum Geth node's GraphQL endpoint.
-The GraphQL endpoint is 10x faster than the JSON-RPC endpoint.
+To run this, you must have access to an Ethereum Geth node's [GraphQL
+endpoint](geth). The GraphQL endpoint is 10x faster than the JSON-RPC endpoint.
 :::
 ```bash
 git clone https://github.com/outcaste-io/outserv.git
