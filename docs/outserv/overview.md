@@ -19,3 +19,5 @@ Outserv exposes HTTP port `8080`.
 - Schema: `http://localhost:8080/admin/schema`
 - Lambda: `http://localhost:8080/admin/lambda`
 
+For how to set schema and lambda JS code in Outserv, see [getting
+started](/docs/intro).
