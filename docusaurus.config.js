@@ -24,7 +24,7 @@ const config = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/outcaste-io/outserv',
+          editUrl: 'https://github.com/outcaste-io/docs/blob/main',
         },
         // blog: {
         //   showReadingTime: true,
