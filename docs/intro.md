@@ -2,46 +2,87 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Get Started with Outserv
 
-Let's discover **Docusaurus in less than 10 minutes**.
+Let's get started with **Outserv in less than 5 minutes.**
 
-## Getting Started
+## 0. Prerequisites
 
-Get started by **creating a new site**.
+:::tip Test Setup (July 2022)
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+- Go version 1.17.6
+- Node 16.14.2
+- Ubuntu 22.04 LTS
 
-### What you'll need
+:::
 
-- [Node.js](https://nodejs.org/en/download/) version 14 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+We recommend you use a Linux system to run Outserv. To run lambda functions, we
+recommend installing nodejs as well.
 
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
+## 1. Install Outserv
 
 ```bash
-npm init docusaurus@latest my-website classic
+sudo apt-get update
+sudo apt-get install gcc make golang nodejs
+
+git clone https://github.com/outcaste-io/outserv.git
+cd ./outserv
+git checkout v22.07.0
+make install
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+## 2. Run Outserv GraphQL
 
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
+We will run Outserv with Lambdas. So, ensure that you have NodeJS installed.
 
 ```bash
-cd my-website
-npm run start
+outserv graphql --lambda="num=2;" # Data would go into "data" dir.
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+:::tip Lambda Errors
 
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+If you get lambda errors, most likely the JS files in lambda directory are
+incompatible with your nodejs installation (they were built with 16.14.2). You
+can regenerate them like so, and re-run outserv.
 
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+```
+cd outserv/lambda
+make build
+```
+
+:::
+
+## 3. Load up GraphQL Schema and Lambdas
+
+You can pick up a GraphQL schema and Lambda code from
+[`importers/eth`](https://github.com/outcaste-io/outserv/blob/main/importers/eth),
+or use your own schema.
+
+```bash
+cd outserv/importers/eth
+curl -X POST http://localhost:8080/admin/schema --data-binary '@schema.graphql'
+curl -X POST http://localhost:8080/admin/lambda --data-binary '@lambda.js'
+```
+
+## 4. Run Ethereum loader
+
+You can either run geth locally, or you can use a geth gateway provided by
+Cloudflare, Alchemy, Infura or others. I recommend using GraphQL endpoint
+because that's [much
+faster](https://twitter.com/manishrjain/status/1546675483986710529) than
+JSON-RPC.
+
+```bash
+cd outserv/importers/eth
+go build . && ./eth --geth "GraphQL or JSON-RPC endpoint of Geth"
+```
+
+This would start loading ETH transactions into Outserv.
+
+
+## 5. You're ready
+
+You can now use any GraphQL editor (like Insomnia) to query Outserv at:
+`http://localhost:8080/graphql`. The editor would show the API documentation
+automatically.
+

@@ -4,32 +4,33 @@ import styles from './styles.module.css';
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
+    title: 'Blockchain Search',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Outserv's importers connect with any blockchain and index their data to
+        provide fast, production-grade search capabilities.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Fast GraphQL APIs',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Outserv generates GraphQL APIs out of the box and executes queries
+        within milliseconds. Extend these APIs with custom Javascript
+        code run by Outserv.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Fast Setup',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Single downloadable binary can index 15 million Ethereum
+        blocks within hours, making it easy and fast to set up.
       </>
     ),
   },
