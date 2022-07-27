@@ -31,7 +31,7 @@ separate from your other Ethereum wallets.
 ### Step 1. Create Wallet
 
 ```bash
-$ outserv wallet --create --dir outserv-wallet
+$ outserv wallet --create --dir ~/.wallet
 
 Please enter password for the wallet:
 Please re-enter password for the wallet:
@@ -80,22 +80,19 @@ Note the address of the wallet. To fund the wallet, you should send ETH to this 
 
 ### (Optional) Step 2. Test the Wallet
 
-You can optionally test that the wallet is working by running:
+You can optionally test that the wallet is working by running the following
+command. It would attempt to charge $1 (non-refundable). Please ensure that you
+have sufficient funds to run the test.
 
 ```bash
-outserv wallet --dir outserv-wallet --test
-
-# This should spit out something like insufficient funds,
-# because it's running on the test `rinkerby` network.
-# It won't charge you.
+outserv wallet --dir ~/.wallet --test
 ```
-
 
 ### Step 3. Provide Wallet to Outserv
 
 When you run Outserv, you can pass this wallet using the `--wallet` flag.
 ```bash
-outserv graphql --wallet="dir=outserv-wallet; password=<the-password>"
+outserv graphql --wallet="dir=~/.wallet; password=<the-password>"
 ```
 
 ### Step 4. Fund the Wallet
