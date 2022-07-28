@@ -27,7 +27,7 @@ sudo apt-get install gcc make golang nodejs
 
 git clone https://github.com/outcaste-io/outserv.git
 cd ./outserv
-git checkout v22.07.0
+git checkout release/v22.07
 make install
 ```
 
