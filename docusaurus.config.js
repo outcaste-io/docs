@@ -23,6 +23,7 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
+          sidebarCollapsed: false,
           // Please change this to your repo.
           editUrl: 'https://github.com/outcaste-io/docs/blob/main',
         },
@@ -62,6 +63,11 @@ const config = {
             position: 'right',
           },
         ],
+      },
+      docs: {
+        sidebar: {
+          hideable: true,
+        },
       },
       footer: {
         style: 'dark',
@@ -106,7 +112,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Outcaste LLC. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Outcaste LLC. Built with Docusaurus 2.`,
       },
       prism: {
         theme: lightCodeTheme,
