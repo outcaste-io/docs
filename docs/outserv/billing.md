@@ -23,12 +23,12 @@ blockchain for that. Outserv provides the `outserv wallet` tool to create a
 wallet dedicated for Outserv charges. Once you create this wallet, you can then
 provide it to the `outserv graphql` server for charging.
 
+### Step 1. Create Wallet
+
 :::tip
 We highly recommend creating a wallet specifically for Outserv and keeping it
 separate from your other Ethereum wallets.
 :::
-
-### Step 1. Create Wallet
 
 ```bash
 $ outserv wallet --create --dir ~/.wallet
