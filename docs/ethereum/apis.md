@@ -2,12 +2,12 @@
 sidebar_position: 3
 ---
 
-# 3. Ethereum APIs
+# 3. Ethereum API Gateway
 
-Ethereum APIs listed here are the JSON-RPC APIs as [defined
-here](https://ethereum.org/en/developers/docs/apis/json-rpc/).
-
-Outserv exposes GraphQL APIs corresponding to each of these JSON-RPC APIs.
+Outserv can act as a high-performance and enriched Ethereum Gateway. Here's a
+list of all the Ethereum JSON-RPC APIs and their corresponding GraphQL APIs
+exposed by Outserv. Ethereum JSON-RPC API list and their definitions are as
+[defined here](https://ethereum.org/en/developers/docs/apis/json-rpc/).
 
 ### eth_blockNumber ✓
 *Returns the balance of the account of given address.*
